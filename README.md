@@ -1,4 +1,3 @@
-```
 # Fake Job Postings
 
 ## Overview
