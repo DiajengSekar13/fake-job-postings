@@ -1,0 +1,16 @@
+streamlit
+scikit-learn
+nltk
+scipy
+streamlit
+joblib
+nltk
+wordcloud
+matplotlib
+streamlit
+joblib
+numpy
+pandas
+seaborn
+shap
+Pillow
