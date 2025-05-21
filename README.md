@@ -47,4 +47,3 @@ Bachelor’s Student in Data Science | National Development University "Veteran"
 ---
 
 Feel free to modify or add details based on your specific implementation! 🚀
-```
