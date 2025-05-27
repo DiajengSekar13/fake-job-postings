@@ -1,6 +1,6 @@
 import nltk
-nltk.download('punkt')  # Mengunduh dataset punkt untuk tokenisasi teks
-import streamlit as st 
+import nltk
+nltk.data.path.append("nltk_data")
 import joblib
 import numpy as np
 import pandas as pd
