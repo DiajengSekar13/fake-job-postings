@@ -1,3 +1,5 @@
+import nltk
+nltk.download('punkt')  # Mengunduh dataset punkt untuk tokenisasi teks
 import streamlit as st 
 import joblib
 import numpy as np
@@ -5,8 +7,6 @@ import pandas as pd
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from scipy.sparse import hstack
-import nltk
-nltk.download('punkt')  # Mengunduh dataset punkt untuk tokenisasi teks
 import seaborn as sns
 import shap
 import streamlit.components.v1 as components
