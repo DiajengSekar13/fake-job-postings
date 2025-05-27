@@ -1,3 +1,11 @@
+import nltk
+import os
+
+# Setup nltk_data path agar tidak perlu download ulang
+nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
+if nltk_data_path not in nltk.data.path:
+    nltk.data.path.append(nltk_data_path)
+    
 import streamlit as st
 import joblib
 import numpy as np
@@ -5,11 +13,10 @@ import pandas as pd
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from scipy.sparse import hstack
-import nltk
 import seaborn as sns
 import shap
 import streamlit.components.v1 as components
-
+from PIL import Image
 
 # Load model & vectorizers
 model = joblib.load("logistic_model.pkl")
@@ -19,12 +26,48 @@ vectorizer_pos = joblib.load("countvectorizer_pos.pkl")
 # Custom style
 st.set_page_config(page_title="Deteksi Lowongan Kerja Palsu", layout="wide")
 
-# Sidebar navigation
-st.sidebar.title("Navigasi")
-page = st.sidebar.radio("Pilih Halaman:", ["Tentang", "Prediksi", "Word Cloud"])
+
+# Tambahkan logo (jika ada)
+logo = Image.open("logo.png")
+st.sidebar.image(logo, width=150)
+
+# Header Sidebar
+st.sidebar.markdown("## 📊 Job Scam Classifier")
+st.sidebar.markdown("### 🚀 Selamat datang!")
+st.sidebar.markdown("""
+Analisis cerdas untuk membedakan lowongan kerja **asli** dan **palsu**.  
+Gunakan fitur prediksi, eksplorasi teks, dan visualisasi word cloud.  
+""")
+
+# Navigasi utama
+page = st.sidebar.radio(
+    "🧭 Navigasi:",
+    [
+        "📌 Tentang",
+        "🔍 Prediksi",
+        "☁️ Word Cloud"
+    ]
+)
+
+# Info tambahan collapsible
+with st.sidebar.expander("📂 Info Dataset"):
+    st.markdown("""
+    - Jumlah data: 17.000+
+    - Fitur teks: deskripsi pekerjaan
+    - Label: asli atau palsu
+    """)
+
+# Kontak / Footer
+st.sidebar.markdown("---")
+st.sidebar.markdown("""
+👩‍💻 **Diajeng Sekar**  
+📧 [Email](mailto:diajeng.sekar11@gmail.com)  
+🔗 [GitHub](https://github.com/DiajengSekar13)  
+🔗 [LinkedIn](https://linkedin.com/in/...)
+""")
 
 # Prediksi
-if page == "Prediksi":
+if page == "🔍 Prediksi":
     st.title("🔍 Deteksi Iklan Lowongan Kerja Palsu")
     
     # Penjelasan lebih detail
@@ -101,7 +144,7 @@ if page == "Prediksi":
                 st.success(f"✅ Ini kemungkinan **ASLI** ({(1 - prob)*100:.2f}%)")
 
 # Tentang
-elif page == "Tentang":
+elif page == "📌 Tentang":
     st.title("ℹ️ Tentang Aplikasi 🧠")
 
     st.markdown("""
@@ -209,9 +252,9 @@ elif page == "Tentang":
         st.error(f"Terjadi kesalahan saat memuat data: {e}")
 
 # Word Cloud
-elif page == "Word Cloud":
+elif page == "☁️ Word Cloud":
     st.title("☁️ Word Cloud: Visualisasi Kata Umum dalam Iklan Lowongan Kerja 🧾")
-    
+
     st.markdown("""
     🔍 **Apa itu Word Cloud?**  
     Word Cloud adalah representasi visual dari kata-kata yang paling sering muncul dalam kumpulan teks. Ukuran kata mencerminkan frekuensi kemunculannya – semakin besar kata, semakin sering ia muncul di dalam data.
@@ -221,65 +264,60 @@ elif page == "Word Cloud":
     - Mengidentifikasi kata kunci yang **menonjol** di tiap kategori.
     - Memberi wawasan awal sebelum melakukan analisis tekstual lebih lanjut.
     - Membantu mengenali pola-pola umum dari kata-kata yang sering muncul dalam penipuan kerja, seperti "immediate", "payment", atau "training provided".
-    
+
     🧐 **Interpretasi Singkat:**
-    - **Iklan Asli ✅** biasanya memiliki kata-kata teknis, posisi pekerjaan, dan istilah profesional seperti *engineer*, *developer*, *team*, dan *experience*.
-    - **Iklan Palsu ❌** cenderung menyertakan kata-kata yang terdengar menjanjikan secara finansial namun tidak spesifik, seperti *money*, *income*, *apply now*, atau *no experience*.
-    
-    👇 Berikut visualisasi Word Cloud dari masing-masing kategori:
+    - **Iklan Asli ✅**: kata-kata teknis, posisi pekerjaan, dan istilah profesional seperti *engineer*, *developer*, *team*, dan *experience*.
+    - **Iklan Palsu ❌**: kata-kata yang menjanjikan secara finansial namun tidak spesifik, seperti *money*, *income*, *apply now*, atau *no experience*.
     """)
 
-    col1, col2 = st.columns(2)
+    # PILIHAN WORD CLOUD
+    pilihan_wc = st.radio(
+        "Pilih kategori iklan untuk ditampilkan Word Cloud-nya:",
+        ("Iklan Asli (Real Job)", "Iklan Palsu (Fake Job)")
+    )
 
-    with col1:
-        st.subheader("🟦 Iklan Asli")
-        st.image("wc-realjob.png", caption="✅ Word Cloud - Iklan Lowongan Kerja Asli", width=450)
+    if pilihan_wc == "Iklan Asli (Real Job)":
+        st.subheader("✅ Word Cloud - Iklan Lowongan Kerja Asli")
+        st.image("wc-realjob.png", use_container_width=True)
         st.markdown("""
         ### 🔍 Analisis Word Cloud - Iklan Asli
-        Berdasarkan word cloud dari **iklan lowongan pekerjaan yang nyata**, terlihat bahwa kata-kata seperti:
-        **"experience," "work," "team," "client," "ability," "year," "company," "looking," "time," "service," "project," "provide," "customer,"** dan **"product"** paling sering muncul.
+        Kata-kata dominan:
+        **"experience", "work", "team", "client", "ability", "year", "company", "looking", "time", "service", "project", "provide", "customer", "product"**
 
-        #### 📌 Insight Utama:
-        1. **Fokus pada Pengalaman dan Kemampuan**
-           > Kata **"experience"** dominan → menunjukkan kebutuhan atas tenaga kerja berpengalaman. Kata **"ability"** mengarah pada keahlian teknis/soft skill yang spesifik.
-        2. **Kerja Tim & Relasi Profesional**
-           > Kata **"team"** dan **"client"** sering muncul → banyak pekerjaan asli mengedepankan kolaborasi dan komunikasi antar tim/klien.
-        3. **Konteks Bisnis dan Proyek**
-           > Munculnya kata seperti **"project," "service," "provide"** → menggambarkan jenis pekerjaan nyata yang berbasis layanan atau target proyek tertentu.
-        4. **Citra Perusahaan**
-           > Kata **"company"** dan **"product"** → iklan asli cenderung menyampaikan identitas serta nilai perusahaan secara jelas.
+        #### 📌 Insight:
+        - **Pengalaman & Kemampuan:** Kata "experience" dan "ability" menandakan keahlian teknis atau soft skill.
+        - **Tim & Klien:** "team", "client" → kolaborasi dan komunikasi penting.
+        - **Bisnis & Proyek:** "project", "service", "provide" → fokus pada hasil nyata.
+        - **Identitas Perusahaan:** "company", "product" → profesional & transparan.
 
         ✅ **Kesimpulan:**  
-        Lowongan asli umumnya lebih spesifik, teknis, dan mencerminkan kebutuhan bisnis nyata.
+        Lowongan asli lebih spesifik, teknis, dan menggambarkan kebutuhan bisnis yang nyata.
         """)
-    with col2:
-        st.subheader("🟥 Iklan Palsu")
-        st.image("wc-fakejob.png", caption="❌ Word Cloud - Iklan Lowongan Kerja Palsu", width=450)
+
+    elif pilihan_wc == "Iklan Palsu (Fake Job)":
+        st.subheader("❌ Word Cloud - Iklan Lowongan Kerja Palsu")
+        st.image("wc-fakejob.png", use_container_width=True)
         st.markdown("""
         ### ⚠️ Analisis Word Cloud - Iklan Palsu
-        Dari data iklan lowongan kerja palsu, terlihat bahwa kata-kata seperti:
-        **"Customer Service," "data entry," "looking," "High School," "position," "ability," "responsible,"** dan **"communication skill"** sering muncul.
+        Kata-kata dominan:
+        **"Customer Service", "data entry", "looking", "High School", "position", "ability", "responsible", "communication skill"**
 
-        #### 📌 Pola dan Temuan Utama:
-        1. **Pekerjaan Umum & Tidak Spesifik**
-           > Kata seperti *"data entry"* atau *"customer service"* sering muncul → menandakan pekerjaan mudah dan kurang jelas peran tugasnya.
-        2. **Target Pelamar Minim Pengalaman**
-           > Munculnya kata seperti *"High School"* dan *"looking"* → menyasar pencari kerja muda atau fresh graduate tanpa pengalaman.
-        3. **Deskripsi Umum dan Umum Lagi**
-           > Kata seperti *"ability"*, *"responsible"*, dan *"communication skill"* terlalu generik tanpa penjelasan teknis, berbeda dengan iklan asli.
-        4. **Indikasi Penipuan**
-           > Penggunaan kata-kata ini sering disertai tawaran gaji tinggi & janji manis. Waspadai permintaan biaya awal, interview online tanpa kontak resmi, atau ketidakjelasan perusahaan.
+        #### 📌 Temuan:
+        - **Umum & Tidak Spesifik:** pekerjaan mudah tanpa peran jelas.
+        - **Sasar Pelamar Minim Pengalaman:** "High School", "looking".
+        - **Deskripsi Generik:** tanpa teknikal detail.
+        - **Waspada Penipuan:** kata menarik tapi jebakan.
 
         ❗ **Kesimpulan:**  
-        Word cloud ini menunjukkan bahwa **iklan palsu lebih banyak menggunakan bahasa umum dan membidik mereka yang mudah tertipu oleh tawaran menarik.**
+        Iklan palsu menggunakan bahasa umum dan menjanjikan hal-hal bombastis, tapi seringkali tanpa kejelasan.
         """)
 
     st.markdown("""
     💡 **Tips Analisis**  
-    - Gunakan Word Cloud ini sebagai titik awal untuk eksplorasi teks.
-    - Kombinasikan dengan teknik NLP lainnya seperti **TF-IDF**, **topic modeling**, atau **POS tagging** untuk analisis mendalam.
-    - Kata-kata umum yang muncul di Word Cloud bisa digunakan untuk fitur seleksi dalam model prediksi.
+    - Jadikan Word Cloud sebagai awal eksplorasi.
+    - Lanjutkan dengan teknik NLP seperti **TF-IDF**, **topic modeling**, dan lainnya.
+    - Kata-kata di sini dapat dijadikan fitur dalam pemodelan prediktif.
 
     🔁 **Update Dinamis**  
-    Word Cloud bisa diperbarui dengan dataset terbaru untuk terus menyesuaikan pola bahasa penipuan kerja yang terus berubah seiring waktu.
+    Word Cloud bisa diperbarui sesuai tren bahasa iklan kerja terbaru.
     """)
