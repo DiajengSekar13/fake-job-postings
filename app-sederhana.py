@@ -1,11 +1,14 @@
 import nltk
 import os
 
-# Setup nltk_data path agar tidak perlu download ulang
 nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
 if nltk_data_path not in nltk.data.path:
     nltk.data.path.append(nltk_data_path)
-    
+
+# import setelah set nltk_data path
+from nltk.tokenize import word_tokenize
+from nltk import pos_tag
+
 import streamlit as st
 import joblib
 import numpy as np
