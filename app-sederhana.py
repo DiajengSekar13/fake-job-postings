@@ -5,9 +5,8 @@ nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
 if nltk_data_path not in nltk.data.path:
     nltk.data.path.append(nltk_data_path)
 
-# import setelah set nltk_data path
 from nltk.tokenize import word_tokenize
-from nltk import pos_tag
+pos_tags = pos_tag(word_tokenize(user_input))
 
 import streamlit as st
 import joblib
@@ -97,7 +96,9 @@ if page == "🔍 Prediksi":
             st.warning("⚠️ Input harus terdiri dari setidaknya 5 kata agar model dapat melakukan analisis yang akurat.")
         else:
             # Tokenisasi dan POS tagging
-            pos_tags = nltk.pos_tag(nltk.word_tokenize(user_input))
+            tokenizer = TreebankWordTokenizer()
+            tokens = tokenizer.tokenize(user_input)
+            pos_tags = pos_tag(tokens)
             pos_features = ' '.join(tag[1] for tag in pos_tags)
 
             # Transformasi teks dan fitur POS menggunakan CountVectorizer
@@ -111,8 +112,6 @@ if page == "🔍 Prediksi":
             prediction = model.predict(combined_vector)[0]
             prob = model.predict_proba(combined_vector)[0][1]
 
-            # Interpretasi fitur penting (SHAP / alternatif manual)
-            # Ambil fitur teks penting yang digunakan model
             feature_names = vectorizer_text.get_feature_names_out()
             text_features = text_vector.toarray()[0]
 
